@@ -4,90 +4,36 @@
   <meta charset="UTF-8">
   <title>Daily Coding Analysis - Login</title>
   <style>
-    /* Keep all your existing CSS as it is */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
     body {
       background-color: #f4f6f8;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      color: #222;
+      display: flex; justify-content: center; align-items: center;
+      height: 100vh; color: #222;
     }
     .container {
-      background: #fff;
-      padding: 40px;
-      border-radius: 8px;
+      background: #fff; padding: 40px; border-radius: 8px;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-      width: 360px;
-      text-align: center;
+      width: 360px; text-align: center;
     }
-    .container h1 {
-      font-size: 24px;
-      color: #333;
-      margin-bottom: 8px;
+    .container h1 { font-size: 24px; color: #333; margin-bottom: 8px; }
+    .container p { font-size: 14px; color: #777; margin-bottom: 30px; }
+    .container h2 { font-size: 20px; color: #333; margin-bottom: 25px; }
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: 12px; margin-bottom: 15px;
+      border: 1px solid #e2e6ee; border-radius: 6px;
+      background-color: #f9fafc; font-size: 14px;
     }
-    .container p {
-      font-size: 14px;
-      color: #777;
-      margin-bottom: 30px;
-    }
-    .container h2 {
-      font-size: 20px;
-      color: #333;
-      margin-bottom: 25px;
-    }
-    input[type="text"],
-    input[type="password"] {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      border: 1px solid #e2e6ee;
-      border-radius: 6px;
-      background-color: #f9fafc;
-      font-size: 14px;
-    }
-    .forgot-password {
-      text-align: right;
-      margin-bottom: 20px;
-    }
-    .forgot-password a {
-      font-size: 13px;
-      color: #007bff;
-      text-decoration: none;
-    }
+    .forgot-password { text-align: right; margin-bottom: 20px; }
+    .forgot-password a { font-size: 13px; color: #007bff; text-decoration: none; }
     .login-btn {
-      width: 100%;
-      padding: 12px;
-      background-color: #007bff;
-      border: none;
-      color: white;
-      font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+      width: 100%; padding: 12px; background-color: #007bff;
+      border: none; color: white; font-size: 16px;
+      border-radius: 6px; cursor: pointer; transition: background-color 0.3s ease;
     }
-    .login-btn:hover {
-      background-color: #0056b3;
-    }
-    .signup-text {
-      margin-top: 20px;
-      font-size: 14px;
-    }
-    .signup-text a {
-      color: #007bff;
-      text-decoration: none;
-    }
-    .error {
-      color: red;
-      font-size: 14px;
-      margin-bottom: 10px;
-    }
+    .login-btn:hover { background-color: #0056b3; }
+    .signup-text { margin-top: 20px; font-size: 14px; }
+    .signup-text a { color: #007bff; text-decoration: none; }
+    .error { color: red; font-size: 14px; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -99,9 +45,7 @@
     <form id="loginForm">
       <input type="text" id="username" placeholder="Registration Number" required>
       <input type="password" id="password" placeholder="Password" required>
-      <div class="forgot-password">
-        <a href="#">Forgot password?</a>
-      </div>
+      <div class="forgot-password"><a href="#">Forgot password?</a></div>
       <button type="submit" class="login-btn">Log In</button>
       <p class="signup-text">Don't have an account? <a href="#">Sign up</a></p>
     </form>
@@ -110,14 +54,13 @@
   <script>
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
       const errorMsg = document.getElementById('errorMsg');
-
-      errorMsg.textContent = ''; // clear previous error
+      errorMsg.textContent = '';
 
       try {
-        const res = await fetch('https://your-backend-url.onrender.com/login', {
+        const res = await fetch('/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
@@ -126,11 +69,10 @@
         const data = await res.json();
 
         if (res.ok) {
-  localStorage.setItem('loggedIn', 'true');  // Save login state
-  window.location.href = "dashboard.html";
-}
-else {
-          errorMsg.textContent = data.error;
+          localStorage.setItem('loggedIn', 'true'); // Save login state
+          window.location.href = "dashboard.html";
+        } else {
+          errorMsg.textContent = data.error || "Login failed. Please try again.";
         }
       } catch (err) {
         errorMsg.textContent = "Server error. Please try again later.";

@@ -1,7 +1,7 @@
-// api/login.js
+// api/register.js
 import { MongoClient } from "mongodb";
 
-const uri = process.env.MONGODB_URI; 
+const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 
 export default async function handler(req, res) {
@@ -14,15 +14,16 @@ export default async function handler(req, res) {
 
     try {
       await client.connect();
-      const db = client.db("dailycoding"); 
+      const db = client.db("dailycoding");
       const users = db.collection("users");
 
-      const user = await users.findOne({ username, password });
-      if (user) {
-        return res.status(200).json({ message: "Login successful" });
-      } else {
-        return res.status(401).json({ error: "Invalid username or password" });
+      const existingUser = await users.findOne({ username });
+      if (existingUser) {
+        return res.status(400).json({ error: "Username already exists" });
       }
+
+      await users.insertOne({ username, password });
+      return res.status(201).json({ message: "Registration successful" });
     } catch (err) {
       console.error(err);
       return res.status(500).json({ error: "Database connection error" });

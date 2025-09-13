@@ -1,34 +1,45 @@
-import clientPromise from "../lib/mongodb";
+import { connectToDb, getDb } from '../lib/mongodb';
+import bcrypt from 'bcrypt';
 
 export default async function handler(req, res) {
-  if (req.method === "POST") {
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-      return res.status(400).json({ error: "Username and password are required" });
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
-      const client = await clientPromise;
-      const db = client.db("dailycoding");
-      const users = db.collection("users");
+        await connectToDb(); // Ensure DB connection is established
 
-      // Check if username already exists
-      const existingUser = await users.findOne({ username });
-      if (existingUser) {
-        return res.status(400).json({ error: "Username already exists" });
-      }
+        const db = getDb();
+        const { name, email, password } = req.body;
 
-      // Save user directly (plain text password)
-      await users.insertOne({ username, password });
+        if (!name || !email || !password) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
 
-      return res.status(201).json({ message: "User registered successfully" });
-    } catch (err) {
-      console.error("Registration error:", err);
-      return res.status(500).json({ error: "Internal server error" });
+        const usersCollection = db.collection('users');
+
+        // Check if user already exists
+        const existingUser = await usersCollection.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email is already registered' });
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create new user
+        const newUser = {
+            name,
+            email,
+            password: hashedPassword,
+            createdAt: new Date()
+        };
+
+        await usersCollection.insertOne(newUser);
+
+        res.status(201).json({ message: 'User registered successfully' });
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-  } else {
-    res.setHeader("Allow", ["POST"]);
-    return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
-  }
 }

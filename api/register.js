@@ -10,18 +10,18 @@ export default async function handler(req, res) {
         await connectToDb(); // Ensure DB connection is established
 
         const db = getDb();
-        const { name, email, password } = req.body;
+        const { username, password } = req.body; // Accept username and password
 
-        if (!name || !email || !password) {
+        if (!username || !password) {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
         const usersCollection = db.collection('users');
 
         // Check if user already exists
-        const existingUser = await usersCollection.findOne({ email });
+        const existingUser = await usersCollection.findOne({ username });
         if (existingUser) {
-            return res.status(400).json({ error: 'Email is already registered' });
+            return res.status(400).json({ error: 'Username is already registered' });
         }
 
         // Hash the password
@@ -29,8 +29,7 @@ export default async function handler(req, res) {
 
         // Create new user
         const newUser = {
-            name,
-            email,
+            username,
             password: hashedPassword,
             createdAt: new Date()
         };
